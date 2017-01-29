@@ -1,15 +1,16 @@
-from decimal import getcontext,Decimal
-from Vectors import Vector
+from decimal import Decimal, getcontext
+
+from vector import Vector
 
 getcontext().prec = 30
 
 
-class Line(object):
+class Plane(object):
 
     NO_NONZERO_ELTS_FOUND_MSG = 'No nonzero elements found'
 
     def __init__(self, normal_vector=None, constant_term=None):
-        self.dimension = 2
+        self.dimension = 3
 
         if not normal_vector:
             all_zeros = ['0']*self.dimension
@@ -29,14 +30,14 @@ class Line(object):
             c = self.constant_term
             basepoint_coords = ['0']*self.dimension
 
-            initial_index = Line.first_nonzero_index(n)
+            initial_index = Plane.first_nonzero_index(n)
             initial_coefficient = n[initial_index]
 
             basepoint_coords[initial_index] = c/initial_coefficient
             self.basepoint = Vector(basepoint_coords)
 
         except Exception as e:
-            if str(e) == Line.NO_NONZERO_ELTS_FOUND_MSG:
+            if str(e) == Plane.NO_NONZERO_ELTS_FOUND_MSG:
                 self.basepoint = None
             else:
                 raise e
@@ -69,7 +70,7 @@ class Line(object):
         n = self.normal_vector
 
         try:
-            initial_index = Line.first_nonzero_index(n)
+            initial_index = Plane.first_nonzero_index(n)
             terms = [write_coefficient(n[i], is_initial_term=(i==initial_index)) + 'x_{}'.format(i+1)
                      for i in range(self.dimension) if round(n[i], num_decimal_places) != 0]
             output = ' '.join(terms)
@@ -93,84 +94,9 @@ class Line(object):
         for k, item in enumerate(iterable):
             if not MyDecimal(item).is_near_zero():
                 return k
-        raise Exception(Line.NO_NONZERO_ELTS_FOUND_MSG)
-
-    def if_parallel_lines(self,l2):
-        n1 = self.normal_vector
-        n2 = l2.normal_vector
-
-        return n1.parallel_check(n2)
-
-
-    def __eq__(self, other):
-        if not self.if_parallel_lines(l2):
-            return False
-
-        x0 = self.basepoint
-        y0 = l2.basepoint
-
-        difference = x0.minus(y0)
-
-        n = self.normal_vector
-        return difference.orthogonal_check(n)
-
-
-
-    def swap(self,l2):
-        t = self.normal_vector[0]
-        self.normal_vector[0] = l2.normal_vector[0]
-        l2.normal_vector[0] = t
-
-        t = self.normal_vector[1]
-        self.normal_vector[1] = l2.normal_vector[1]
-        l2.normal_vector[1] = t
-
-        t = self.basepoint[0]
-        self.basepoint[0] = l2.basepoint[0]
-        l2.basepoint[0] = t
-
-        t = self.basepoint[1]
-        self.basepoint[1] = l2.basepoint[1]
-        l2.basepoint[1] = t
-
-        t = self.constant_term
-        self.constant_term = l2.constant_term
-        l2.constant_term = t
-
-
-
-    def find_intersection(self,l2):
-
-        if self.if_equal_lines(l2):
-            print "coincident lines"
-
-        elif self.if_parallel_lines(l2):
-            print "lines are parallel"
-
-        else:
-            if (self.normal_vector[0]==0):
-                self.swap(l2)
-
-            a,b = self.normal_vector.coordinates
-            k1 = self.constant_term
-            c,d = l2.normal_vector.coordinates
-            k2 = l2.constant_term
-
-            x = Decimal(((d*k1) - (b*k2))/((a*d) - (b*c)))
-            y = Decimal(((a*k2) - (c*k1))/((a*d) - (b*c)))
-
-            print "point of intersection : (%d,%d)"%(x,y)
+        raise Exception(Plane.NO_NONZERO_ELTS_FOUND_MSG)
 
 
 class MyDecimal(Decimal):
     def is_near_zero(self, eps=1e-10):
         return abs(self) < eps
-
-
-l1 = Line(normal_vector=Vector([4.046,2.836]),constant_term='1.21')
-l2 = Line(normal_vector=Vector(['10.115','7.09']),constant_term='3.025')
-l1.find_intersection(l2)
-
-l1 = Line(normal_vector=Vector(['7.204','3.182']),constant_term='8.68')
-l2 = Line(normal_vector=Vector(['8.172','4.114']),constant_term='9.883')
-l1.find_intersection(l2)
