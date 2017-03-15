@@ -102,7 +102,7 @@ class Line(object):
         return n1.parallel_check(n2)
 
 
-    def __eq__(self, other):
+    def __eq__(self, l2):
         if not self.if_parallel_lines(l2):
             return False
 

@@ -1,6 +1,6 @@
 from decimal import Decimal, getcontext
 
-from vector import Vector
+from Vector import Vector
 
 getcontext().prec = 30
 
@@ -97,6 +97,26 @@ class Plane(object):
         raise Exception(Plane.NO_NONZERO_ELTS_FOUND_MSG)
 
 
+    def is_parallel(self,p2):
+        n1  = self.normal_vector
+        n2 = p2.normal_vector
+
+        return n1.parallel_check(n2)
+
+    def __eq__(self, p2):
+        if not self.is_parallel(p2):
+            return False
+
+        x0 = self.basepoint
+        y0 = p2.basepoint
+
+        difference = x0.minus(y0)
+
+        n = self.normal_vector
+        return difference.orthogonal_check(n)
+
+
 class MyDecimal(Decimal):
     def is_near_zero(self, eps=1e-10):
         return abs(self) < eps
+
